@@ -37,7 +37,12 @@ func main() {
 	personService := service.NewPersonService(personRepo)
 	personController := http2.NewUserController(instance, personService)
 
+	todoRepo := repository.NewTodoRepository(db)
+	todoService := service.NewTodoService(todoRepo)
+	todoController := http2.NewTodoController(instance, todoService)
+
 	personController.InitRouter()
+	todoController.InitRouter()
 
 	httpServer := http.NewHttpServer(
 		instance,
