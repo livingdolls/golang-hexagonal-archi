@@ -8,10 +8,12 @@ const (
 	DuplicateUser  ErrorCode = "DUPLICATE_USER"
 	InternalError  ErrorCode = "INTERNAL_ERROR"
 	DuplicateTodo  ErrorCode = "DUPLICATE_TODO"
+	NotFound       ErrorCode = "NOT FOUND"
 )
 
 const (
 	SuccessErrMsg        = "success"
 	InternalErrMsg       = "internal error"
 	InvalidRequestErrMsg = "invalid request"
+	InvalidNotFoundMsg   = "not found"
 )

@@ -1,9 +1,12 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"gotest/internal/core/dto"
 	"gotest/internal/core/port/repository"
+	"log"
+	"strconv"
 	"strings"
 )
 
@@ -22,8 +25,38 @@ const (
 		"`createdAt`" +
 		") VALUES (?,?,?)"
 
-	getTodo = "SELECT * FROM todo"
+	getTodo    = "SELECT * FROM todo"
+	deleteTodo = "DELETE FROM todo WHERE id = ?"
 )
+
+// Delete implements repository.TodoRepository.
+func (t *todoRepository) Delete(id string) error {
+	i, err := strconv.Atoi(id)
+
+	if err != nil {
+		return err
+	}
+
+	res, err := t.db.GetDB().ExecContext(context.Background(), deleteTodo, i)
+
+	if err != nil {
+		log.Println(err.Error())
+
+		return err
+	}
+
+	numbRow, errRow := res.RowsAffected()
+
+	if errRow != nil {
+		return errRow
+	}
+
+	if numbRow == 0 {
+		return repository.TodoNotFound
+	}
+
+	return nil
+}
 
 func (t *todoRepository) GetList() ([]dto.TodoDTO, error) {
 	var todo dto.TodoDTO
