@@ -20,6 +20,23 @@ type todoService struct {
 	todoRepo repository.TodoRepository
 }
 
+// DeleteTodoById implements service.TodoService.
+func (t *todoService) DeleteTodoById(request *request.DeleteTodoRequest) *response.HttpResponse {
+	err := t.todoRepo.Delete(request.Id)
+
+	if err != nil {
+		log.Println(err.Error())
+
+		if err == repository.TodoNotFound {
+			return t.errorResponse(error_code.NotFound, error_code.InvalidNotFoundMsg)
+		}
+
+		return t.errorResponse(error_code.InternalError, error_code.InternalErrMsg)
+	}
+
+	return t.successResponse(request.Id)
+}
+
 func (t *todoService) GetListTodo() *response.HttpResponse {
 	res, err := t.todoRepo.GetList()
 

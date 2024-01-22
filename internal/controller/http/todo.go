@@ -25,6 +25,7 @@ func (t TodoController) InitRouter() {
 	api := t.gin.Group("/api/v1")
 	router.Post(api, "add-todo", t.addTodo)
 	router.Get(api, "get-todos", t.getListTodo)
+	router.Delete(api, "delete-todo/:Id", t.deleteTodo)
 }
 
 func (t TodoController) addTodo(c *gin.Context) {
@@ -41,6 +42,18 @@ func (t TodoController) addTodo(c *gin.Context) {
 
 func (t TodoController) getListTodo(c *gin.Context) {
 	res := t.todoService.GetListTodo()
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (t TodoController) deleteTodo(c *gin.Context) {
+	var req request.DeleteTodoRequest
+
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, &invalidRequestResponse)
+	}
+
+	res := t.todoService.DeleteTodoById(&req)
 
 	c.JSON(http.StatusOK, res)
 }

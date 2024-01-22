@@ -8,4 +8,5 @@ import (
 type TodoService interface {
 	AddTodo(request *request.AddTodoRequest) *response.HttpResponse
 	GetListTodo() *response.HttpResponse
+	DeleteTodoById(request *request.DeleteTodoRequest) *response.HttpResponse
 }
