@@ -13,3 +13,11 @@ func Get(router *gin.RouterGroup, path string, handler func(c *gin.Context)) {
 func Delete(router *gin.RouterGroup, path string, handler func(c *gin.Context)) {
 	router.DELETE(path, handler)
 }
+
+func PostWithMiddleware(router gin.IRoutes, path string, handler func(c *gin.Context)) {
+	router.POST(path, handler)
+}
+
+func GetWithMiddleware(router gin.IRoutes, path string, handler func(c *gin.Context)) {
+	router.GET(path, handler)
+}

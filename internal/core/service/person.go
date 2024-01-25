@@ -8,6 +8,8 @@ import (
 	"gotest/internal/core/port/repository"
 	"gotest/internal/core/port/service"
 	"log"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -16,6 +18,25 @@ const (
 
 type personService struct {
 	personRepo repository.PersonRepository
+}
+
+// GetPersonByFirstName implements service.PersonService.
+func (p personService) GetPersonByFirstName(request *request.GetPersonsByFirstName) *response.HttpResponse {
+	if len(request.FirstName) == 0 {
+		return p.errorResponse(error_code.InvalidRequest, error_code.InvalidRequestErrMsg)
+	}
+
+	res, err := p.personRepo.GetPersonsByFirstName(request.FirstName)
+
+	if err != nil {
+		if err == repository.NoPersonsInRow {
+			return p.errorResponse(error_code.NotFound, error_code.InvalidNotFoundMsg)
+		}
+
+		return p.errorResponse(error_code.InternalError, error_code.InternalErrMsg)
+	}
+
+	return p.successResponse(res)
 }
 
 // DeletePerson implements service.PersonService.
@@ -52,7 +73,10 @@ func (p personService) AddPerson(request *request.AddPersonRequest) *response.Ht
 		return p.errorResponse(error_code.InvalidRequest, invalidName)
 	}
 
+	id := uuid.New()
+
 	personDTO := dto.PersonDTO{
+		PersonsID: id.String(),
 		LastName:  request.LastName,
 		FirstName: request.FirstName,
 		Address:   request.Address,

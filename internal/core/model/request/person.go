@@ -10,3 +10,7 @@ type AddPersonRequest struct {
 type DeletePersonRequest struct {
 	PersonsID string `json:"PersonsID"`
 }
+
+type GetPersonsByFirstName struct {
+	FirstName string `json:"firstname"`
+}

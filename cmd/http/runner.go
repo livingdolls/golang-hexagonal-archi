@@ -5,6 +5,7 @@ import (
 	"gotest/internal/core/config"
 	"gotest/internal/core/server/http"
 	"gotest/internal/core/service"
+	"gotest/internal/infra/auth"
 	infraConf "gotest/internal/infra/config"
 	"gotest/internal/infra/repository"
 	"log"
@@ -33,6 +34,8 @@ func main() {
 		log.Fatalf("failed database err=%s\n", err.Error())
 	}
 
+	token, err := auth.New()
+
 	personRepo := repository.NewPersonRepository(db)
 	personService := service.NewPersonService(personRepo)
 	personController := http2.NewUserController(instance, personService)
@@ -41,8 +44,12 @@ func main() {
 	todoService := service.NewTodoService(todoRepo)
 	todoController := http2.NewTodoController(instance, todoService)
 
+	authService := service.NewAuthService(token, personRepo)
+	authController := http2.NewAuthController(instance, authService)
+
 	personController.InitRouter()
 	todoController.InitRouter()
+	authController.InitRouter()
 
 	httpServer := http.NewHttpServer(
 		instance,

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"gotest/internal/core/common/router"
 	"gotest/internal/core/entity/error_code"
 	"gotest/internal/core/model/request"
@@ -33,9 +34,17 @@ func NewUserController(gin *gin.Engine, personService service.PersonService) Per
 
 func (p PersonController) InitRouter() {
 	api := p.gin.Group("/api/v1")
+	var token service.TokenService
+
 	router.Post(api, "/signup", p.signUp)
-	router.Get(api, "/persons", p.listPersons)
 	router.Delete(api, "/persons/:PersonsID", p.DeletePerson)
+	router.Get(api, "/persons/get/:FirstName", p.getPersonsByName)
+
+	persons := api.Group("/persons").Use(authMiddleware(token))
+	{
+		router.GetWithMiddleware(persons, "/", p.listPersons)
+	}
+
 }
 
 func (p PersonController) signUp(c *gin.Context) {
@@ -58,6 +67,20 @@ func (p PersonController) DeletePerson(c *gin.Context) {
 	resp := p.personService.DeletePerson(req)
 
 	c.JSON(http.StatusOK, resp)
+}
+
+func (p PersonController) getPersonsByName(c *gin.Context) {
+	var req request.GetPersonsByFirstName
+
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.AbortWithStatusJSON(http.StatusOK, &invalidRequestResponse)
+	}
+
+	fmt.Println(req)
+
+	respon := p.personService.GetPersonByFirstName(&req)
+
+	c.JSON(http.StatusOK, respon)
 }
 
 func (p PersonController) listPersons(c *gin.Context) {
