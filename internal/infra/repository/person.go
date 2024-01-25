@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"gotest/internal/core/dto"
 	"gotest/internal/core/port/repository"
@@ -24,10 +25,35 @@ const (
 		"`Address`," +
 		"`City`" +
 		") VALUES (?,?,?,?,?)"
+
+	getPersons = "SELECT * FROM Persons WHERE FirstName = ?"
 )
 
 type personRepository struct {
 	db repository.Database
+}
+
+// GetPersonsByFirstName implements repository.PersonRepository.
+func (p personRepository) GetPersonsByFirstName(id string) (*dto.PersonDTO, error) {
+	var persons dto.PersonDTO
+
+	err := p.db.GetDB().QueryRowContext(context.Background(), getPersons, id).Scan(
+		&persons.PersonsID,
+		&persons.LastName,
+		&persons.FirstName,
+		&persons.Address,
+		&persons.City,
+	)
+
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, repository.NoPersonsInRow
+		}
+
+		return nil, err
+	}
+
+	return &persons, nil
 }
 
 // DeletePerson implements repository.PersonRepository.
@@ -75,7 +101,7 @@ func (p personRepository) GetPersons() ([]dto.PersonDTO, error) {
 func (p personRepository) Insert(person dto.PersonDTO) error {
 	res, err := p.db.GetDB().Exec(
 		insertStatement,
-		1,
+		person.PersonsID,
 		person.LastName,
 		person.FirstName,
 		person.Address,
